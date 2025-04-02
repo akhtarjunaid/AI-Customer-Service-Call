@@ -10,16 +10,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Install zip tool
         uses: montudor/action-zip@v1
+
       - name: Create Zip file for Lambda function
         run: zip -r code.zip .
+
       - name: AWS CLI v2
         uses: imehedi/actions-awscli-v2@latest
         with:
           args: "lambda update-function-code \
             --function-name arn:aws:lambda:us-east-2:179819072553:function:WhisperHandler \
             --zip-file fileb://code.zip"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: "us-east-2"
+
+      - name: Update Lambda environment variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name arn:aws:lambda:us-east-2:179819072553:function:WhisperHandler \
+            --environment "Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}}"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
