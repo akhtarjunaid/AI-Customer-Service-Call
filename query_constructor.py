@@ -56,4 +56,4 @@ def construct_query(customer_query):
             expression += f" AND Amenities CONTAINS :amenity{i}"
             expression_values[f':amenity{i}'] = amenity
 
-    return expression_values
+    return expression, expression_values
