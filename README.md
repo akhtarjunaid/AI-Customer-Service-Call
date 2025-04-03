@@ -1,1 +1,1 @@
-Using AWS to host AI call handler for hotel customer service
+AI agent that automates hotel customer service calls for bookings and inquiries, hosted on AWS
