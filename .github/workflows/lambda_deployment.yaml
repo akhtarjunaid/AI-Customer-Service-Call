@@ -1,4 +1,4 @@
-name: Deploy Lambda Function
+name: Build and Deploy Lambda Docker Image
 
 on:
   push:
@@ -7,33 +7,40 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      ECR_REPO: twilio-handler
+      REGION: us-east-2
+      LAMBDA_FUNCTION_NAME: twilio-handler
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Install zip tool
-        uses: montudor/action-zip@v1
-
-      - name: Create Zip file for Lambda function
-        run: zip -r code.zip .
-
-      - name: AWS CLI v2
-        uses: imehedi/actions-awscli-v2@latest
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          args: "lambda update-function-code \
-            --function-name arn:aws:lambda:us-east-2:179819072553:function:WhisperHandler \
-            --zip-file fileb://code.zip"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-2"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.REGION }}
 
-      - name: Update Lambda environment variables
+      - name: Log in to Amazon ECR
+        id: login-ecr
         run: |
-          aws lambda update-function-configuration \
-            --function-name arn:aws:lambda:us-east-2:179819072553:function:WhisperHandler \
-            --environment "Variables={OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}}"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-2"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com"
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPO .
+
+      - name: Tag and push image to ECR
+        run: |
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.REGION }}.amazonaws.com/${{ env.ECR_REPO }}:latest"
+          docker tag $ECR_REPO:latest $IMAGE_URI
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      - name: Update Lambda function to use new image
+        run: |
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --image-uri $IMAGE_URI
