@@ -1,20 +1,31 @@
 import json
 import boto3
-from transcribe import transcribe_with_whisper
+from src.transcribe import transcribe_with_whisper
 from generate_response import prompt
 from query_constructor import construct_query
 
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table("YourDynamoDBTable")
+table = dynamodb.Table("hotel-information")
 
 
 def retrieve_db(customer_query):
     expression, expression_values = construct_query(customer_query)
 
+    if not expression:
+        return {
+            "statusCode": 400,
+            "body": {
+                "message": "Sorry, I couldn't find enough details in your request. Can you tell me the room location, type, price range, or any amenities you're looking for?"
+            },
+        }
+
+    kwargs = {
+        "FilterExpression": expression,
+        "ExpressionAttributeValues": expression_values,
+    }
+
     try:
-        response = table.scan(
-            FilterExpression=expression, ExpressionAttributeValues=expression_values
-        )
+        response = table.scan(**kwargs)
 
         db_return = response.get("Items", [])
 
