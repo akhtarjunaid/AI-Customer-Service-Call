@@ -70,11 +70,9 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/xml"},
-        "body": f"""
-        <?xml version="1.0" encoding="UTF-8"?>
+        "body": f"""<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say>{db_response}</Say>
-            <Redirect method="POST">/chat</Redirect> <!-- allows next turn -->
-        </Response>
-        """,
+            <Redirect method="POST">/chat</Redirect>
+        </Response>""",
     }
