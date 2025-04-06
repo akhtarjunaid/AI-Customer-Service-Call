@@ -1,4 +1,5 @@
 import json
+import urllib
 import boto3
 from src.transcribe import transcribe_with_whisper
 from generate_response import prompt
@@ -32,7 +33,9 @@ def retrieve_db(customer_query):
         if db_return:
             db_context = "\n".join(
                 [
-                    f"Room ID: {room['RoomID']}, Price: ${room['Price']}, Availability: {room['Availability']}"
+                    f"Room ID: {room.get('roomid')}, Price: ${room.get('room_price')}, "
+                    f"Location: {room.get('room_location')}, Type: {room.get('room_type')}, "
+                    f"Booked Dates: {', '.join(room.get('days_booked', []))}"
                     for room in db_return
                 ]
             )
@@ -41,7 +44,7 @@ def retrieve_db(customer_query):
 
             return {
                 "statusCode": 200,
-                "body": {"gpt_response": response.choices[0].text.strip()},
+                "body": {"gpt_response": response.strip()},
             }
         else:
             return {
@@ -59,9 +62,17 @@ def retrieve_db(customer_query):
 
 
 def lambda_handler(event, context):
-    customer_query = (
-        event["body"].split("SpeechResult=")[1].split("&")[0].replace("+", " ")
-    )
+    # customer_query = (
+    #     event["body"].split("SpeechResult=")[1].split("&")[0].replace("+", " ")
+    # )
+
+    body = event["body"]  # This is the raw form data string
+
+    # Use urllib.parse to parse the query string
+    params = urllib.parse.parse_qs(body)
+
+    # Get the value for SpeechResult (if present)
+    customer_query = params.get("SpeechResult", [""])[0]
 
     db_response = retrieve_db(customer_query)
 
