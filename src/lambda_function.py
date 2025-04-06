@@ -76,7 +76,7 @@ def lambda_handler(event, context):
         "body": f"""<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say>{db_response}</Say>
-            <Gather input="speech" language="en-US" action="/chat" method="POST" timeout="5" speechTimeout="auto">
+            <Gather input="speech" language="en-US" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="7" speechTimeout="auto">
                 <Say>Do you have any further questions?</Say>
             </Gather>
             <Say>Sorry, I didn't catch that. Goodbye!</Say>
