@@ -43,22 +43,13 @@ def retrieve_db(customer_query, session_id):
 
             response = prompt(customer_query, db_context, session_id)
 
-            return {
-                "statusCode": 200,
-                "body": {"gpt_response": response.strip()},
-            }
+            return {response.strip()}
         else:
-            return {
-                "statusCode": 404,
-                "body": {"message": "No rooms found matching the query"},
-            }
+            return {"No rooms found matching the query"}
     except Exception as e:
         return {
-            "statusCode": 500,
-            "body": {
-                "message": f"Error retrieving data from DynamoDB: {str(e)}. \
-                    Expression: {str(expression)}. Expression Values: {str(expression_values)}"
-            },
+            f"Error retrieving data from DynamoDB: {str(e)}. \
+             Expression: {str(expression)}. Expression Values: {str(expression_values)}"
         }
 
 
@@ -73,7 +64,7 @@ def lambda_handler(event, context):
             "headers": {"Content-Type": "application/xml"},
             "body": f"""<?xml version="1.0" encoding="UTF-8"?>
             <Response>
-                <Gather input="speech" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="5" speechTimeout="auto">
+                <Gather input="speech" language="en-US" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="5" speechTimeout="auto">
                     <Say>Thank you for calling, how can I help you today?</Say>
                 </Gather>
                 <Say>Sorry, I didn't catch that. Goodbye!</Say>
@@ -87,7 +78,9 @@ def lambda_handler(event, context):
         "headers": {"Content-Type": "application/xml"},
         "body": f"""<?xml version="1.0" encoding="UTF-8"?>
         <Response>
-            <Say>{db_response}</Say>
-            <Redirect method="POST">https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat</Redirect>
+            <Gather input="speech" language="en-US" action="/chat" method="POST" timeout="5" speechTimeout="auto">
+                    <Say>{db_response}</Say>
+            </Gather>
+            <Say>Sorry, I didn't catch that. Goodbye!</Say>
         </Response>""",
     }
