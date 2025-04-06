@@ -15,7 +15,9 @@ def retrieve_db(customer_query, session_id):
         return {
             "statusCode": 400,
             "body": {
-                "message": "Sorry, I couldn't find enough details in your request. Can you tell me the room location, type, price range, or any amenities you're looking for?"
+                "message": "Sorry, I couldn't find enough details in your request. \
+                Can you tell me the room location, type, price range, or any amenities \
+                you're looking for?"
             },
         }
 
@@ -64,6 +66,19 @@ def lambda_handler(event, context):
     parsed_body = parse_qs(event["body"])
     session_id = parsed_body.get("CallSid", ["anonymous"])[0]
     customer_query = parsed_body.get("SpeechResult", [""])[0]
+
+    if "SpeechResult" not in parsed_body:
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/xml"},
+            "body": f"""<?xml version="1.0" encoding="UTF-8"?>
+            <Response>
+                <Gather input="speech" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="5" speechTime="auto">
+                    <Say>Thank you for calling, how can I help you today?</Say>
+                </Gather>
+                <Say>Sorry, I didn't catch that. Goodbye!</Say>
+            </Response>""",
+        }
 
     db_response = retrieve_db(customer_query, session_id)
 
