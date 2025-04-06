@@ -51,7 +51,10 @@ def retrieve_db(customer_query):
     except Exception as e:
         return {
             "statusCode": 500,
-            "body": {"message": f"Error retrieving data from DynamoDB: {str(e)}"},
+            "body": {
+                "message": f"Error retrieving data from DynamoDB: {str(e)}. \
+                    Expression: {str(expression)}. Expression Values: {str(expression_values)}"
+            },
         }
 
 
