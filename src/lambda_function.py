@@ -1,4 +1,4 @@
-import urllib
+from urllib.parse import parse_qs
 import boto3
 from src.transcribe import transcribe_with_whisper
 from generate_response import prompt
@@ -8,7 +8,7 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("hotel-information")
 
 
-def retrieve_db(customer_query):
+def retrieve_db(customer_query, session_id):
     expression, expression_values = construct_query(customer_query)
 
     if not expression:
@@ -39,7 +39,7 @@ def retrieve_db(customer_query):
                 ]
             )
 
-            response = prompt(customer_query, db_context)
+            response = prompt(customer_query, db_context, session_id)
 
             return {
                 "statusCode": 200,
@@ -61,20 +61,20 @@ def retrieve_db(customer_query):
 
 
 def lambda_handler(event, context):
-    body = event["body"]
-    params = urllib.parse.parse_qs(body)
+    parsed_body = parse_qs(event["body"])
+    session_id = parsed_body.get("CallSid", ["anonymous"])[0]
+    customer_query = parsed_body.get("SpeechResult", [""])[0]
 
-    customer_query = params.get("SpeechResult", [""])[0]
-
-    db_response = retrieve_db(customer_query)
-
-    response_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-    <Response>
-        <Say>{db_response}</Say>
-    </Response>"""
+    db_response = retrieve_db(customer_query, session_id)
 
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/xml"},
-        "body": response_xml,
+        "body": f"""
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+            <Say>{db_response}</Say>
+            <Redirect method="POST">/chat</Redirect> <!-- allows next turn -->
+        </Response>
+        """,
     }
