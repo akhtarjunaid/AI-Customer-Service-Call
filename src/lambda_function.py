@@ -1,4 +1,3 @@
-import json
 import urllib
 import boto3
 from src.transcribe import transcribe_with_whisper
@@ -62,16 +61,9 @@ def retrieve_db(customer_query):
 
 
 def lambda_handler(event, context):
-    # customer_query = (
-    #     event["body"].split("SpeechResult=")[1].split("&")[0].replace("+", " ")
-    # )
-
-    body = event["body"]  # This is the raw form data string
-
-    # Use urllib.parse to parse the query string
+    body = event["body"]
     params = urllib.parse.parse_qs(body)
 
-    # Get the value for SpeechResult (if present)
     customer_query = params.get("SpeechResult", [""])[0]
 
     db_response = retrieve_db(customer_query)
