@@ -13,12 +13,9 @@ def retrieve_db(customer_query, session_id):
 
     if not expression:
         return {
-            "statusCode": 400,
-            "body": {
-                "message": "Sorry, I couldn't find enough details in your request. \
-                Can you tell me the room location, type, price range, or any amenities \
-                you're looking for?"
-            },
+            "Sorry, I couldn't find enough details in your request. \
+            Can you tell me the room location, type, price range, or any amenities \
+            you're looking for?"
         }
 
     kwargs = {
@@ -64,7 +61,7 @@ def lambda_handler(event, context):
             "headers": {"Content-Type": "application/xml"},
             "body": f"""<?xml version="1.0" encoding="UTF-8"?>
             <Response>
-                <Gather input="speech" language="en-US" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="5" speechTimeout="auto">
+                <Gather input="speech" language="en-US" action="https://g9j6r5ypl5.execute-api.us-east-2.amazonaws.com/test/chat" method="POST" timeout="10" speechTimeout="auto">
                     <Say>Thank you for calling, how can I help you today?</Say>
                 </Gather>
                 <Say>Sorry, I didn't catch that. Goodbye!</Say>
@@ -78,8 +75,9 @@ def lambda_handler(event, context):
         "headers": {"Content-Type": "application/xml"},
         "body": f"""<?xml version="1.0" encoding="UTF-8"?>
         <Response>
+            <Say>{db_response}</Say>
             <Gather input="speech" language="en-US" action="/chat" method="POST" timeout="5" speechTimeout="auto">
-                    <Say>{db_response}</Say>
+                <Say>Do you have any further questions?</Say>
             </Gather>
             <Say>Sorry, I didn't catch that. Goodbye!</Say>
         </Response>""",
