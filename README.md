@@ -26,7 +26,7 @@ This project is a serverless, real-time AI phone assistant that leverages AWS se
 
 ## Setup Instructions
 
-First, make sure you have the following:
+First, clone this repository and make sure you have the following:
 
 - Docker installed
 - An AWS account with Lambda, API Gateway, DynamoDB, and ECR
@@ -34,7 +34,7 @@ First, make sure you have the following:
 - Twilio account with a voice-capable phone number
 - Python 3.12
 
-Next, create the docker image and push to ECR:
+Next, cd into the repository folder then create the docker image and push to ECR:
 
 ```
 aws ecr get-login-password --region YOUR_REGION | docker login --username AWS --password-stdin YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com
@@ -42,6 +42,7 @@ docker build -t YOUR-DOCKER-IMAGE .
 docker tag ai-assistant:latest YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/YOUR-DOCKER-IMAGE:latest
 docker push YOUR_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/YOUR-DOCKER-IMAGE:latest
 ```
+
 To run the docker image, create a container Lambda function and load the image you pushed earlier. 
 
 We will also need to create two DynamoDB tables. One will be for storing hotel information, the other for storing chat bot interaction history. 
