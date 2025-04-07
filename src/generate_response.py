@@ -24,7 +24,7 @@ def get_conversation(session_id):
 
 
 def store_message(session_id, role, content):
-    timestamp = int(time.time() * 1000)
+    timestamp = str(int(time.time()))
     table.put_item(
         Item={
             "session_id": session_id,
