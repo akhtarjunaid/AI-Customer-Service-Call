@@ -12,35 +12,6 @@ room_types = ["king bed", "queen bed", "suite", "single room"]
 amenities = ["Wi-Fi", "pool", "free breakfast", "parking", "gym"]
 
 
-def extract_location(query):
-    for location in locations:
-        if location.lower() in query.lower():
-            return location
-    return None
-
-
-def extract_price_range(query):
-    match = re.search(r"\$(\d+)\s*-\s*\$(\d+)", query)
-    if match:
-        return (int(match.group(1)), int(match.group(2)))
-    return None
-
-
-def extract_room_type(query):
-    for room_type in room_types:
-        if room_type.lower() in query.lower():
-            return room_type
-    return None
-
-
-def extract_amenities(query):
-    found_amenities = []
-    for amenity in amenities:
-        if amenity.lower() in query.lower():
-            found_amenities.append(amenity)
-    return found_amenities
-
-
 def extract_filters_with_llm(user_query):
     prompt = f"""
     You are helping extract filter conditions for a DynamoDB hotel booking database. \
