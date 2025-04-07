@@ -50,7 +50,9 @@ def prompt(customer_query, db_context, session_id):
                 about a hotel. Here is the information about all rooms: {db_context} \
                 The customer said this: {customer_query}. \
                 Please answer the customer query based on the room information. \
-                Keep your response friendly but as to-the-point and concise as possible.",
+                If the user's question is unrelated to hotel rooms, politely say \
+                you're only able to assist with room-related questions.\
+                Keep your response friendly but as short, to-the-point, and concise as possible.",
             },
         ],
         temperature=0.3,
