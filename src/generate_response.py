@@ -46,13 +46,16 @@ def prompt(customer_query, db_context, session_id):
         messages=[
             {
                 "role": "user",
-                "content": f"Customer asked: {customer_query} \
-                    \nHere are some room options:\n{db_context} \
-                    \nPlease answer the customer query based on the room information.",
+                "content": f"You are a helpful assistant who is helping a customer with inquires \
+                about a hotel. Here is the information about all rooms: {db_context} \
+                The customer said this: {customer_query}. \
+                Please answer the customer query based on the room information. \
+                Keep your response friendly but as to-the-point and concise as possible.",
             },
         ],
+        temperature=0.3,
     )
-    bot_response = response.choices[0].message.content
+    bot_response = response.choices[0].message.content.strip()
 
     store_message(session_id, "assistant", bot_response)
 

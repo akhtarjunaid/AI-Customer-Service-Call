@@ -9,45 +9,20 @@ table = dynamodb.Table("hotel-information")
 
 
 def retrieve_db(customer_query, session_id):
-    expression, expression_values = construct_query(customer_query)
+    table_query = table.scan()
+    rooms = table_query["Items"]
 
-    if not expression:
-        return {
-            "Sorry, I couldn't find enough details in your request. \
-            Can you tell me the room location, type, price range, or any amenities \
-            you're looking for?"
-        }
+    context_lines = []
+    for r in rooms:
+        context_lines.append(
+            f"Room {r['room_number']} is a {r['room_type']} in {r['room_location']} "
+            f"for ${r['price']} per night. Booked days: {', '.join(r.get('days_booked', []))}"
+        )
+    context = "\n".join(context_lines)
 
-    kwargs = {
-        "FilterExpression": expression,
-        "ExpressionAttributeValues": expression_values,
-    }
+    response = prompt(customer_query, context, session_id)
 
-    try:
-        response = table.scan(**kwargs)
-
-        db_return = response.get("Items", [])
-
-        if db_return:
-            db_context = "\n".join(
-                [
-                    f"Room ID: {room.get('roomid')}, Price: ${room.get('room_price')}, "
-                    f"Location: {room.get('room_location')}, Type: {room.get('room_type')}, "
-                    f"Booked Dates: {', '.join(room.get('days_booked', []))}"
-                    for room in db_return
-                ]
-            )
-
-            response = prompt(customer_query, db_context, session_id)
-
-            return {response.strip()}
-        else:
-            return {"No rooms found matching the query"}
-    except Exception as e:
-        return {
-            f"Error retrieving data from DynamoDB: {str(e)}. \
-             Expression: {str(expression)}. Expression Values: {str(expression_values)}"
-        }
+    return response
 
 
 def lambda_handler(event, context):
