@@ -48,4 +48,8 @@ We will also need to create two DynamoDB tables. One will be for storing hotel i
 
 Finally, we need to connect Twilio to our lambda function. To do so, create a new resource in AWS API Gateway with a POST method.
 
-Thats it! You can now test your client by calling your Twilio number. 
+---
+
+## Thats it! 
+
+You can now test your client by calling your Twilio number. 
