@@ -1,6 +1,5 @@
 from urllib.parse import parse_qs
 import boto3
-from src.transcribe import transcribe_with_whisper
 from generate_response import prompt
 from query_constructor import construct_query
 
