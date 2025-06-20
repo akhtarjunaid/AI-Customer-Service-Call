@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ECR_REPO: poc-call-ai
-      REGION: eu-central-1
+      REGION: us-east-1
       LAMBDA_FUNCTION_NAME: twilio-handler
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          # aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.REGION }}
 
       - name: Log in to Amazon ECR
